@@ -46,11 +46,34 @@ test = ["anyio>=4.11.0", "pytest>=8.4.2", "pytest-asyncio>=1.2.0"]
 lint = ["ruff>=0.13.3"]
 dev = [{ include-group = "test" }, { include-group = "lint" }]
 
-# --- UV ---
+# --- UV CONFIGURATION ---
 
 [tool.uv]
+preview = true           # Enable all preview features
 package = false          # Not a distributable package, just a runnable project
 default-groups = ["dev"]
+cache-dir = ".cache/uv"
+
+# Performance optimizations
+compile-bytecode = true # 10-20% faster startup
+link-mode = "hardlink"  # Fastest cache linking (macOS/Linux)
+
+# Platform targeting (20-30% faster resolution)
+environments = ["sys_platform == 'linux'", "sys_platform == 'darwin'"]
+
+# Resolution strategy
+resolution = "highest"      # Latest compatible versions
+prerelease = "if-necessary" # Allow prereleases when needed
+
+[tool.uv.sources]
+
+[tool.uv.build-backend]
+source-exclude = [
+    "dist/**",
+    "**/__pycache__/**",
+    "**/build/**",
+    "**/.pytest_cache/**",
+]
 
 # --- RUFF ---
 

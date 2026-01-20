@@ -24,7 +24,7 @@ from dedalus_mcp.auth import Connection, SecretKeys
 # -----------------------------------------------------------------------------
 
 gmail = Connection(
-    name="gmail",
+    name="gmail-mcp",  # Must match name from OAuth callback (derived from slug)
     secrets=SecretKeys(token="GMAIL_ACCESS_TOKEN"),
     base_url="https://gmail.googleapis.com",
     auth_header_format="Bearer {api_key}",

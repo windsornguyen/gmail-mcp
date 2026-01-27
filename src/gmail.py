@@ -24,7 +24,6 @@ from dedalus_mcp.auth import Connection, SecretKeys
 # -----------------------------------------------------------------------------
 
 gmail = Connection(
-    name="gmail-mcp",  # Must match name from OAuth callback (derived from slug)
     secrets=SecretKeys(token="GMAIL_ACCESS_TOKEN"),
     base_url="https://gmail.googleapis.com",
     auth_header_format="Bearer {api_key}",
@@ -40,7 +39,7 @@ GmailResult = list[TextContent]
 async def _req(method: HttpMethod, path: str, body: dict | None = None) -> GmailResult:
     """Make a Gmail API request and return JSON as TextContent."""
     ctx = get_context()
-    resp = await ctx.dispatch("gmail", HttpRequest(method=method, path=path, body=body))
+    resp = await ctx.dispatch(HttpRequest(method=method, path=path, body=body))
     if resp.success:
         data = resp.response.body or {}
         return [TextContent(type="text", text=json.dumps(data, indent=2))]

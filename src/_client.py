@@ -21,7 +21,6 @@ load_dotenv()
 
 from dedalus_labs import AsyncDedalus, AuthenticationError, DedalusRunner  # noqa: E402
 
-
 class MissingEnvError(ValueError):
     """Required environment variable not set."""
 
@@ -57,14 +56,11 @@ async def with_oauth_retry(fn: Callable[[], Awaitable[T]]) -> T:
         url = body.get("connect_url") or body.get("detail", {}).get("connect_url")
         if not url:
             raise
-        print("\n" + "=" * 60)
-        print("OAuth required. Opening browser...")
-        print(f"\nConnect URL: {url}")
-        print("\nRedirect URI (add to Google Cloud Console):")
-        print("  https://admin.api.dedaluslabs.ai/v1/oauth/callback\n")
-        print("=" * 60)
+        print("\nAttempting to open your default browser.")
+        print("If the browser does not open, open the following URL:\n")
+        print(url)
         webbrowser.open(url)
-        input("Press Enter after completing OAuth...")
+        input("\nPress Enter after completing OAuth...")
         return await fn()
 
 
@@ -76,8 +72,9 @@ async def run_with_runner() -> None:
     result = await with_oauth_retry(
         lambda: runner.run(
             input="List my recent emails and summarize them",
-            model="openai/gpt-4.1",
+            model="anthropic/claude-opus-4-5",
             mcp_servers=["windsor/gmail-mcp"],
+            max_tokens=8192,  # Hack to avoid Anthropic SDK's 64K timeout heuristic, but need a proper fix.
         )
     )
 
@@ -96,7 +93,7 @@ async def run_raw() -> None:
 
     async def do_request():
         return await client.chat.completions.create(
-            model="openai/gpt-4.1",
+            model="anthropic/claude-opus-4-5",
             messages=[
                 {
                     "role": "user",
@@ -104,6 +101,7 @@ async def run_raw() -> None:
                 }
             ],
             mcp_servers=["windsor/gmail-mcp"],
+            max_tokens=8192,  # Hack to avoid Anthropic's 64K timeout heuristic
         )
 
     resp = await with_oauth_retry(do_request)
@@ -124,10 +122,10 @@ async def main() -> None:
     print("=" * 60)
     await run_with_runner()
 
-    print("\n" + "=" * 60)
-    print("Raw Client")
-    print("=" * 60)
-    await run_raw()
+    # print("\n" + "=" * 60)
+    # print("Raw Client")
+    # print("=" * 60)
+    # await run_raw()
 
 
 if __name__ == "__main__":
